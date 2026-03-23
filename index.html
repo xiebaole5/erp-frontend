@@ -1,0 +1,191 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>物料申购系统 - 天牛五金</title>
+  <style>
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif; background: #f5f5f5; padding: 20px; }
+    .container { max-width: 600px; margin: 0 auto; }
+    .header { background: linear-gradient(135deg, #1890ff 0%, #096dd9 100%); color: white; padding: 25px; border-radius: 12px 12px 0 0; text-align: center; }
+    .header h1 { font-size: 22px; margin-bottom: 5px; }
+    .header p { font-size: 14px; opacity: 0.9; }
+    .company { font-size: 12px; margin-top: 8px; opacity: 0.8; }
+    .form-card { background: white; padding: 25px; border-radius: 0 0 12px 12px; box-shadow: 0 4px 12px rgba(0,0,0,0.1); }
+    .form-group { margin-bottom: 18px; }
+    .form-group label { display: block; margin-bottom: 6px; font-weight: 500; color: #333; font-size: 14px; }
+    .form-group label span { color: #ff4d4f; }
+    .form-group input, .form-group select, .form-group textarea { width: 100%; padding: 12px; border: 1px solid #ddd; border-radius: 8px; font-size: 14px; transition: border-color 0.3s; }
+    .form-group input:focus, .form-group select:focus, .form-group textarea:focus { outline: none; border-color: #1890ff; }
+    .form-group textarea { resize: vertical; min-height: 80px; }
+    .row { display: flex; gap: 15px; }
+    .col { flex: 1; }
+    .file-upload { border: 2px dashed #ddd; padding: 25px; text-align: center; border-radius: 8px; cursor: pointer; transition: all 0.3s; background: #fafafa; }
+    .file-upload:hover { border-color: #1890ff; background: #e6f7ff; }
+    .file-upload input { display: none; }
+    .file-icon { font-size: 32px; margin-bottom: 8px; }
+    .file-text { color: #666; font-size: 14px; }
+    .file-hint { font-size: 12px; color: #999; margin-top: 5px; }
+    .file-list { margin-top: 10px; }
+    .file-item { background: #f0f0f0; padding: 10px 15px; border-radius: 6px; margin-bottom: 8px; display: flex; justify-content: space-between; align-items: center; }
+    .file-name { font-size: 13px; color: #333; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; max-width: 200px; }
+    .file-remove { color: #ff4d4f; cursor: pointer; font-size: 18px; }
+    .file-remove:hover { color: #ff7875; }
+    .btn { width: 100%; padding: 14px; background: linear-gradient(135deg, #1890ff 0%, #096dd9 100%); color: white; border: none; border-radius: 8px; font-size: 16px; font-weight: 500; cursor: pointer; transition: all 0.3s; }
+    .btn:hover { transform: translateY(-2px); box-shadow: 0 4px 12px rgba(24,144,255,0.4); }
+    .btn:disabled { background: #ccc; cursor: not-allowed; transform: none; box-shadow: none; }
+    .message { padding: 15px; border-radius: 8px; margin-bottom: 16px; display: none; text-align: center; font-size: 14px; }
+    .message.success { background: #f6ffed; border: 1px solid #b7eb8f; color: #52c41a; }
+    .message.error { background: #fff2f0; border: 1px solid #ffccc7; color: #ff4d4f; }
+    .admin-link { text-align: center; margin-top: 20px; padding-top: 20px; border-top: 1px solid #f0f0f0; }
+    .admin-link a { color: #1890ff; text-decoration: none; font-size: 14px; }
+    .admin-link a:hover { text-decoration: underline; }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <div class="header">
+      <h1>物料申购系统</h1>
+      <p>提交您的物料采购申请</p>
+      <div class="company">天牛五金制品（惠州）有限公司</div>
+    </div>
+    <div class="form-card">
+      <div id="message" class="message"></div>
+      <form id="orderForm">
+        <div class="form-group">
+          <label>申请人姓名 <span>*</span></label>
+          <input type="text" name="applicant_name" required placeholder="请输入您的姓名">
+        </div>
+        <div class="row">
+          <div class="col form-group">
+            <label>部门</label>
+            <input type="text" name="department" placeholder="请输入部门名称">
+          </div>
+          <div class="col form-group">
+            <label>联系方式</label>
+            <input type="text" name="contact" placeholder="手机号或工号">
+          </div>
+        </div>
+        <div class="form-group">
+          <label>物料名称 <span>*</span></label>
+          <input type="text" name="material_name" required placeholder="请输入需要采购的物料名称">
+        </div>
+        <div class="row">
+          <div class="col form-group">
+            <label>数量 <span>*</span></label>
+            <input type="text" name="quantity" required placeholder="数量">
+          </div>
+          <div class="col form-group">
+            <label>单位</label>
+            <input type="text" name="unit" placeholder="个/箱/套">
+          </div>
+        </div>
+        <div class="form-group">
+          <label>紧急程度</label>
+          <select name="urgency">
+            <option value="普通">普通</option>
+            <option value="紧急">紧急</option>
+          </select>
+        </div>
+        <div class="form-group">
+          <label>用途说明</label>
+          <textarea name="purpose" placeholder="请简要说明采购用途"></textarea>
+        </div>
+        <div class="form-group">
+          <label>备注</label>
+          <textarea name="remark" placeholder="其他补充说明（选填）"></textarea>
+        </div>
+        <div class="form-group">
+          <label>上传图片（可选，最多5张）</label>
+          <label class="file-upload" for="fileInput">
+            <div class="file-icon">+</div>
+            <div class="file-text">点击选择图片或拖拽文件到此处</div>
+            <div class="file-hint">支持 JPG、PNG 格式，单张不超过5MB</div>
+            <input type="file" id="fileInput" multiple accept="image/*" onchange="handleFiles(this.files)">
+          </label>
+          <div id="fileList" class="file-list"></div>
+        </div>
+        <button type="submit" class="btn" id="submitBtn">提交申购单</button>
+      </form>
+      <div class="admin-link">
+        <a href="admin.html">管理员入口</a>
+      </div>
+    </div>
+  </div>
+  <script>
+    const API_BASE = 'http://106.14.192.11:3000/api';
+    let selectedFiles = [];
+    
+    function handleFiles(files) {
+      for (let file of files) {
+        if (selectedFiles.length < 5) {
+          if (file.size > 5 * 1024 * 1024) {
+            alert(file.name + ' 超过5MB限制');
+            continue;
+          }
+          selectedFiles.push(file);
+        }
+      }
+      renderFileList();
+    }
+    
+    function removeFile(index) {
+      selectedFiles.splice(index, 1);
+      renderFileList();
+    }
+    
+    function renderFileList() {
+      const list = document.getElementById('fileList');
+      list.innerHTML = selectedFiles.map((f, i) => 
+        `<div class="file-item">
+          <span class="file-name">${f.name}</span>
+          <span class="file-remove" onclick="removeFile(${i})">×</span>
+        </div>`
+      ).join('');
+    }
+    
+    document.getElementById('orderForm').addEventListener('submit', async (e) => {
+      e.preventDefault();
+      const btn = document.getElementById('submitBtn');
+      const msg = document.getElementById('message');
+      btn.disabled = true;
+      btn.textContent = '提交中...';
+      
+      const formData = new FormData();
+      formData.append('applicant_name', e.target.applicant_name.value);
+      formData.append('department', e.target.department.value);
+      formData.append('contact', e.target.contact.value);
+      formData.append('material_name', e.target.material_name.value);
+      formData.append('quantity', e.target.quantity.value);
+      formData.append('unit',e.target.unit.value);
+      formData.append('urgency', e.target.urgency.value);
+      formData.append('purpose', e.target.purpose.value);
+      formData.append('remark', e.target.remark.value);
+      selectedFiles.forEach(f => formData.append('images', f));
+      
+      try {
+        const res = await fetch(API_BASE + '/orders', { method: 'POST', body: formData });
+        const data = await res.json();
+        if (data.success) {
+          msg.className = 'message success';
+          msg.textContent = '提交成功！您的申购单已提交，等待管理员审核。';
+          msg.style.display = 'block';
+          e.target.reset();
+          selectedFiles = [];
+          renderFileList();
+          window.scrollTo(0, 0);
+        } else {
+          throw new Error(data.message);
+        }
+      } catch (err) {
+        msg.className = 'message error';
+        msg.textContent = '提交失败：' + err.message;
+        msg.style.display = 'block';
+      }
+      btn.disabled = false;
+      btn.textContent = '提交申购单';
+    });
+  </script>
+</body>
+</html>
