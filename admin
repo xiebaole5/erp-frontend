@@ -1,0 +1,238 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>申购单管理 - 天牛五金</title>
+  <style>
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif; background: #f5f5f5; padding: 20px; }
+    .container { max-width: 1200px; margin: 0 auto; }
+    .header { background: linear-gradient(135deg, #1890ff 0%, #096dd9 100%); color: white; padding: 20px; border-radius: 12px 12px 0 0; display: flex; justify-content: space-between; align-items: center; }
+    .header h1 { font-size: 20px; }
+    .header-right { display: flex; align-items: center; gap: 15px; }
+    .header button { padding: 8px 16px; background: white; color: #1890ff; border: none; border-radius: 6px; cursor: pointer; font-size: 14px; }
+    .header button:hover { background: #f0f0f0; }
+    .stats { display: flex; gap: 20px; padding: 20px; background: white; border-radius: 0 0 12px 12px; margin-bottom: 20px; box-shadow: 0 4px 12px rgba(0,0,0,0.1); }
+    .stat-item { text-align: center; flex: 1; padding: 15px; border-radius: 8px; background: #fafafa; }
+    .stat-num { font-size: 32px; font-weight: bold; }
+    .stat-label { font-size: 14px; color: #666; margin-top: 5px; }
+    .stat-item.pending .stat-num { color: #faad14; }
+    .stat-item.approved .stat-num { color: #52c41a; }
+    .stat-item.purchased .stat-num { color: #1890ff; }
+    .stat-item.rejected .stat-num { color: #ff4d4f; }
+    .filter { background: white; padding: 15px 20px; border-radius: 8px; margin-bottom: 20px; display: flex; gap: 15px; align-items: center; box-shadow: 0 2px 8px rgba(0,0,0,0.1); }
+    .filter label { font-size: 14px; color: #666; }
+    .filter select { padding: 8px 12px; border: 1px solid #ddd; border-radius: 6px; font-size: 14px; min-width: 120px; }
+    .order-list { display: grid; gap: 20px; }
+    .order-card { background: white; border-radius: 12px; padding: 20px; box-shadow: 0 2px 8px rgba(0,0,0,0.1); }
+    .order-header { display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 15px; padding-bottom: 15px; border-bottom: 1px solid #f0f0f0; }
+    .order-title { font-size: 16px; font-weight: 500; color: #333; }
+    .order-meta { font-size: 13px; color: #999; margin-top: 5px; }
+    .status-badge { padding: 5px 12px; border-radius: 6px; font-size: 13px; font-weight: 500; }
+    .status-pending { background: #fffbe6; color: #faad14; }
+    .status-approved { background: #f6ffed; color: #52c41a; }
+    .status-purchased { background: #e6f7ff; color: #1890ff; }
+    .status-rejected { background: #fff1f0; color: #ff4d4f; }
+    .order-content { display: grid; grid-template-columns: repeat(auto-fit, minmax(140px, 1fr)); gap: 15px; margin-bottom: 15px; }
+    .content-item label { font-size: 12px; color: #999; display: block; margin-bottom: 4px; }
+    .content-item span { font-size: 14px; color: #333; }
+    .images-section { margin-top: 15px; }
+    .images-section label { font-size: 12px; color: #999; display: block; margin-bottom: 8px; }
+    .images-preview { display: flex; gap: 10px; flex-wrap: wrap; }
+    .images-preview img { width: 80px; height: 80px; object-fit: cover; border-radius: 8px; border: 1px solid #eee; cursor: pointer; transition: transform 0.2s; }
+    .images-preview img:hover { transform: scale(1.1); }
+    .admin-section { background: #fafafa; padding: 15px; border-radius: 8px; margin-top: 15px; }
+    .admin-section label { font-size: 13px; color: #666; display: block; margin-bottom: 8px; font-weight: 500; }
+    .admin-section textarea { width: 100%; padding: 10px; border: 1px solid #ddd; border-radius: 6px; font-size: 14px; resize: vertical; min-height: 60px; }
+    .action-buttons { display: flex; gap: 10px; margin-top: 12px; }
+    .action-buttons button { flex: 1; padding: 10px; border: none; border-radius: 6px; cursor: pointer; font-size: 14px; font-weight: 500; transition: all 0.2s; }
+    .btn-purchased { background: #1890ff; color: white; }
+    .btn-purchased:hover { background: #40a9ff; }
+    .btn-approve { background: #52c41a; color: white; }
+    .btn-approve:hover { background: #73d13d; }
+    .btn-reject { background: #ff4d4f; color: white; }
+    .btn-reject:hover { background: #ff7875; }
+    .urgency-tag { display: inline-block; padding: 3px 8px; border-radius: 4px; font-size: 12px; margin-left: 8px; }
+    .urgency-urgent { background: #fff1f0; color: #ff4d4f; }
+    .urgency-normal { background: #f0f0f0; color: #666; }
+    .user-link { text-align: center; margin-top: 30px; }
+    .user-link a { color: #1890ff; text-decoration: none; font-size: 14px; }
+    .empty { text-align: center; padding: 60px 20px; color: #999; }
+    .empty-icon { font-size: 48px; margin-bottom: 15px; }
+    .modal { display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.8); z-index: 1000; justify-content: center; align-items: center; }
+    .modal img { max-width: 90%; max-height: 90%; }
+    .modal-close { position: absolute; top: 20px; right: 20px; color: white; font-size: 30px; cursor: pointer; }
+    @media (max-width: 768px) {
+      .order-content { grid-template-columns: 1fr 1fr; }
+      .action-buttons { flex-wrap: wrap; }
+      .action-buttons button { min-width: 45%; }
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <div class="header">
+      <h1>申购单管理系统</h1>
+      <div class="header-right">
+        <button onclick="loadOrders()">刷新数据</button>
+      </div>
+    </div>
+    <div class="stats">
+      <div class="stat-item pending">
+        <div class="stat-num" id="statPending">0</div>
+        <div class="stat-label">待审核</div>
+      </div>
+      <div class="stat-item approved">
+        <div class="stat-num" id="statApproved">0</div>
+        <div class="stat-label">已批准</div>
+      </div>
+      <div class="stat-item purchased">
+        <div class="stat-num" id="statPurchased">0</div>
+        <div class="stat-label">已采购</div>
+      </div>
+      <div class="stat-item rejected">
+        <div class="stat-num" id="statRejected">0</div>
+        <div class="stat-label">已拒绝</div>
+      </div>
+    </div>
+    <div class="filter">
+      <label>筛选状态：</label>
+      <select id="statusFilter" onchange="loadOrders()">
+        <option value="">全部</option>
+        <option value="待审核">待审核</option>
+        <option value="已批准">已批准</option>
+        <option value="已采购">已采购</option>
+        <option value="已拒绝">已拒绝</option>
+      </select>
+    </div>
+    <div class="order-list" id="orderList"></div>
+    <div class="user-link"><a href="index.html">返回用户端</a></div>
+  </div>
+  
+  <div class="modal" id="imageModal" onclick="closeModal()">
+    <span class="modal-close">×</span>
+    <img id="modalImage" src="" alt="预览">
+  </div>
+
+  <script>
+    const API_BASE = 'http://106.14.192.11:3000/api';
+    
+    async function loadOrders() {
+      const status = document.getElementById('statusFilter').value;
+      try {
+        const res = await fetch(API_BASE + '/orders');
+        const data = await res.json();
+        if (data.success) {
+          let orders = data.data;
+          if (status) orders = orders.filter(o => o.status === status);
+          renderOrders(orders);
+          updateStats(data.data);
+        }
+      } catch (err) {
+        console.error(err);
+        document.getElementById('orderList').innerHTML = '<div class="empty"><div class="empty-icon">!</div>无法连接到服务器，请检查网络</div>';
+      }
+    }
+    
+    function updateStats(orders) {
+      document.getElementById('statPending').textContent = orders.filter(o => o.status === '待审核').length;
+      document.getElementById('statApproved').textContent = orders.filter(o => o.status === '已批准').length;
+      document.getElementById('statPurchased').textContent = orders.filter(o => o.status === '已采购').length;
+      document.getElementById('statRejected').textContent = orders.filter(o => o.status === '已拒绝').length;
+    }
+    
+    function renderOrders(orders) {
+      const list = document.getElementById('orderList');
+      if (orders.length === 0) {
+        list.innerHTML = '<div class="empty"><div class="empty-icon">暂无数据</div><p>当前没有申购单记录</p></div>';
+        return;
+      }
+      list.innerHTML = orders.map(o => `
+        <div class="order-card">
+          <div class="order-header">
+            <div>
+              <div class="order-title">
+                ${o.material_name}
+                <span class="urgency-tag ${o.urgency === '紧急' ? 'urgency-urgent' : 'urgency-normal'}">${o.urgency}</span>
+              </div>
+              <div class="order-meta">
+                申请人：${o.applicant_name} | 部门：${o.department || '未填写'} | ${new Date(o.created_at).toLocaleString('zh-CN')}
+              </div>
+            </div>
+            <span class="status-badge status-${o.status === '待审核' ? 'pending' : o.status === '已批准' ? 'approved' : o.status === '已采购' ? 'purchased' : 'rejected'}">${o.status}</span>
+          </div>
+          <div class="order-content">
+            <div class="content-item">
+              <label>数量</label>
+              <span>${o.quantity} ${o.unit || ''}</span>
+            </div>
+            <div class="content-item">
+              <label>联系方式</label>
+              <span>${o.contact || '未填写'}</span>
+            </div>
+            <div class="content-item">
+              <label>用途</label>
+              <span>${o.purpose || '未填写'}</span>
+            </div>
+          </div>
+          ${o.remark ? `<div class="content-item"><label>备注</label><span>${o.remark}</span></div>` : ''}
+          ${o.images ? `
+            <div class="images-section">
+              <label>附件图片（点击放大）</label>
+              <div class="images-preview">
+                ${o.images.split(',').map(img => `<img src="http://106.14.192.11:3000/uploads/${img}" alt="附件" onclick="showImage(this.src)">`).join('')}
+              </div>
+            </div>
+          ` : ''}
+          ${o.admin_remark ? `<div class="content-item" style="margin-top:10px;"><label>管理员回复</label><span style="color:#1890ff;">${o.admin_remark}</span></div>` : ''}
+          <div class="admin-section">
+            <label>管理员备注/回复</label>
+            <textarea id="remark_${o.id}" placeholder="输入回复内容...">${o.admin_remark || ''}</textarea>
+            <div class="action-buttons">
+              <button class="btn-purchased" onclick="updateStatus('${o.id}', '已采购')">标记已采购</button>
+              <button class="btn-approve" onclick="updateStatus('${o.id}', '已批准')">批准</button>
+              <button class="btn-reject" onclick="updateStatus('${o.id}', '已拒绝')">拒绝</button>
+            </div>
+          </div>
+        </div>
+      `).join('');
+    }
+    
+    function showImage(src) {
+      document.getElementById('modalImage').src = src;
+      document.getElementById('imageModal').style.display = 'flex';
+    }
+    
+    function closeModal() {
+      document.getElementById('imageModal').style.display = 'none';
+    }
+    
+    async function updateStatus(id, status) {
+      const remark = document.getElementById('remark_' + id).value;
+      if (!remark.trim()) {
+        alert('请先输入回复内容');
+        return;
+      }
+      try {
+        const res = await fetch(API_BASE + '/orders/' + id, {
+          method: 'PUT',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ status, admin_remark: remark })
+        });
+const data = await res.json();
+        if (data.success) {
+          alert('操作成功！');
+          loadOrders();
+        } else {
+          alert('操作失败：' + data.message);
+        }
+      } catch (err) {
+        alert('操作失败：' + err.message);
+      }
+    }
+    
+    loadOrders();
+  </script>
+</body>
+</html>
