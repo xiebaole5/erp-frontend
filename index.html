@@ -213,7 +213,7 @@
         function calcCopperAlloy(copperRatio, zincRatio, adjustFee) {
             const rawCost = basePrices.copper * copperRatio / 0.98 +
                 basePrices.zinc * zincRatio / 0.95 +
-                1500 + adjustFee;
+                1500 + 800 + adjustFee;  // +800加工费
             return (rawCost / 1000).toFixed(2);
         }
 
@@ -222,7 +222,7 @@
             const rawCost = basePrices.copper * 0.57 / 0.98 +
                 basePrices.zinc * 0.4 / 0.95 +
                 leadRatio * basePrices.lead +
-                adjustFee;
+                800 + adjustFee;  // +800加工费
             return (rawCost / 1000).toFixed(2);
         }
 
