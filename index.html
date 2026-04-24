@@ -218,12 +218,14 @@
         }
 
         // 黄铜棒材报价（元/吨->除1000转元/kg）
+        // H59-1: 不加2000，最终+1元/kg
+        // 3604: 不加2000，不加额外费用
         function calcBrass(copperContent, zincContent, hasLead, isHex) {
             const copperLoss = 0.98;
             const zincLoss = 0.95;
             const leadRatio = 0.01;
-            const leadPrice = basePrices.lead || 21000; // 长江铅价
-            const adjustmentFee = isHex ? 500 : 0; // 六角棒+500
+            const leadPrice = basePrices.lead || 21000;
+            const hexFee = isHex ? 500 : 0;
             
             let rawCost = basePrices.copper * copperContent / copperLoss +
                 basePrices.zinc * zincContent / zincLoss;
@@ -232,7 +234,8 @@
                 rawCost += leadPrice * leadRatio;
             }
             
-            rawCost += 2000 + adjustmentFee;
+            // H59-1/3604 不加2000加工费
+            rawCost += hexFee;
             
             let price = rawCost / 1000;
             
