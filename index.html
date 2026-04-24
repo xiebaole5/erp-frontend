@@ -218,13 +218,30 @@
         }
 
         // 黄铜棒材报价（元/吨->除1000转元/kg）
-        function calcBrass(copperContent, zincContent, leadRatio, adjustFee) {
-            const leadPrice = 21000; // 铅价固定21000元/吨
-            const rawCost = basePrices.copper * copperContent / 0.98 +
-                basePrices.zinc * zincContent / 0.95 +
-                leadPrice * leadRatio +
-                2000 + adjustFee;
-            return (rawCost / 1000).toFixed(2);
+        function calcBrass(copperContent, zincContent, hasLead, isHex) {
+            const copperLoss = 0.98;
+            const zincLoss = 0.95;
+            const leadRatio = 0.01;
+            const leadPrice = basePrices.lead || 21000; // 长江铅价
+            const adjustmentFee = isHex ? 500 : 0; // 六角棒+500
+            
+            let rawCost = basePrices.copper * copperContent / copperLoss +
+                basePrices.zinc * zincContent / zincLoss;
+            
+            if (hasLead) {
+                rawCost += leadPrice * leadRatio;
+            }
+            
+            rawCost += 2000 + adjustmentFee;
+            
+            let price = rawCost / 1000;
+            
+            // H59-1含铅，最终每公斤+1元
+            if (hasLead) {
+                price += 1.00;
+            }
+            
+            return price.toFixed(2);
         }
 
         // 规格调整（基于供应商规则）
@@ -303,15 +320,15 @@
         function renderBrass() {
             const tbody = document.getElementById('brassTable');
             const items = [
-                { mat: 'H59-1', shape: '圆棒', copper: 0.58, zinc: 0.41, lead: 0.01, fee: 0, wire: 8 },
-                { mat: 'H59-1', shape: '六角/花棒', copper: 0.58, zinc: 0.41, lead: 0.01, fee: 500, wire: 8 },
-                { mat: '3604', shape: '圆棒', copper: 0.58, zinc: 0.41, lead: 0, fee: 0, wire: 8 },
-                { mat: '3604', shape: '六角/花棒', copper: 0.58, zinc: 0.41, lead: 0, fee: 500, wire: 8 }
+                { mat: 'H59-1', shape: '圆棒', copper: 0.58, zinc: 0.41, hasLead: true, isHex: false },
+                { mat: 'H59-1', shape: '六角/花棒', copper: 0.58, zinc: 0.41, hasLead: true, isHex: true },
+                { mat: '3604', shape: '圆棒', copper: 0.58, zinc: 0.42, hasLead: false, isHex: false },
+                { mat: '3604', shape: '六角/花棒', copper: 0.58, zinc: 0.42, hasLead: false, isHex: true }
             ];
             
             let html = '';
             items.forEach(item => {
-                const price = parseFloat(calcBrass(item.copper, item.zinc, item.lead, item.fee)) + getWireAdjust(item.wire);
+                const price = parseFloat(calcBrass(item.copper, item.zinc, item.hasLead, item.isHex));
                 html += `
                     <tr>
                         <td><span class="badge badge-h59">${item.mat}</span></td>
@@ -388,9 +405,10 @@
                 const html = await resp.text();
                 
                 // 解析长江数据 - 更精确的匹配
-                const copperMatch = html.match(/铜[\s\S]{0,20}?(\d{5,6})[\s\S]{0,20}?(\d{5,6})/);
-                const zincMatch = html.match(/锌[\s\S]{0,20}?(\d{5,6})[\s\S]{0,20}?(\d{5,6})/);
-                const nickelMatch = html.match(/镍[\s\S]{0,20}?(\d{5,6})[\s\S]{0,20}?(\d{5,6})/);
+                const copperMatch = html.match(/铜[\s\S]{0,30}?(\d{5,6})[\s\S]{0,30}?(\d{5,6})/);
+                const zincMatch = html.match(/锌[\s\S]{0,30}?(\d{5,6})[\s\S]{0,30}?(\d{5,6})/);
+                const nickelMatch = html.match(/镍[\s\S]{0,30}?(\d{5,6})[\s\S]{0,30}?(\d{5,6})/);
+                const leadMatch = html.match(/铅[\s\S]{0,30}?(\d{5,6})[\s\S]{0,30}?(\d{5,6})/);
                 
                 if (copperMatch) {
                     basePrices.copper = (parseInt(copperMatch[1]) + parseInt(copperMatch[2])) / 2;
@@ -401,10 +419,15 @@
                 if (nickelMatch) {
                     basePrices.nickel = (parseInt(nickelMatch[1]) + parseInt(nickelMatch[2])) / 2;
                 }
+                if (leadMatch) {
+                    basePrices.lead = (parseInt(leadMatch[1]) + parseInt(leadMatch[2])) / 2;
+                }
                 
                 return true;
             } catch (e) {
                 console.log('数据抓取失败，使用默认价格', e);
+                // 默认铅价
+                basePrices.lead = 21000;
                 return false;
             }
         }
