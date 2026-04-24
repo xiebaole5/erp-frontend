@@ -213,17 +213,17 @@
         function calcCopperAlloy(copperRatio, zincRatio, adjustFee) {
             const rawCost = basePrices.copper * copperRatio / 0.98 +
                 basePrices.zinc * zincRatio / 0.95 +
-                1500 + adjustFee;
-            return ((rawCost + 800) / 1000).toFixed(2);  // 结果+800元/吨
+                1800 + adjustFee;
+            return (rawCost / 1000).toFixed(2);
         }
 
         // 黄铜棒材报价（元/吨->除1000转元/kg）
         function calcBrass(leadRatio, adjustFee) {
             const rawCost = basePrices.copper * 0.57 / 0.98 +
-                basePrices.zinc * 0.4 / 0.95 +
+                basePrices.zinc * 0.38 / 0.95 +
                 leadRatio * basePrices.lead +
-                adjustFee;
-            return ((rawCost + 800) / 1000).toFixed(2);  // 结果+800元/吨
+                1800 + adjustFee;
+            return (rawCost / 1000).toFixed(2);
         }
 
         // 规格调整（基于供应商规则）
@@ -262,7 +262,7 @@
         // 渲染核心规格
         function renderCoreSpecs() {
             // H62铜线5.28mm - 用铜合金公式
-            const h62_528 = calcCopperAlloy(0.62, 0.37, 0);
+            const h62_528 = calcCopperAlloy(0.62, 0.38, 0);
             // 304HC2白线3.43mm - 用不锈钢公式
             const hc2_white = calcStainless(0.02, '304HC2', 3.43, false);
             // 304HC2草酸线5.25mm
@@ -285,8 +285,8 @@
             
             let html = '';
             specs.forEach(spec => {
-                const h62 = parseFloat(calcCopperAlloy(0.62, 0.37, spec.adjust)) + getWireAdjust(spec.wire);
-                const h65 = parseFloat(calcCopperAlloy(0.65, 0.34, spec.adjust)) + getWireAdjust(spec.wire);
+                const h62 = parseFloat(calcCopperAlloy(0.62, 0.38, spec.adjust)) + getWireAdjust(spec.wire);
+                const h65 = parseFloat(calcCopperAlloy(0.65, 0.36, spec.adjust)) + getWireAdjust(spec.wire);
                 html += `
                     <tr>
                         <td>${spec.size}</td>
