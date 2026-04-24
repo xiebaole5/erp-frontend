@@ -213,8 +213,8 @@
         function calcCopperAlloy(copperRatio, zincRatio, adjustFee) {
             const rawCost = basePrices.copper * copperRatio / 0.98 +
                 basePrices.zinc * zincRatio / 0.95 +
-                1500 + 800 + adjustFee;  // +800加工费
-            return (rawCost / 1000).toFixed(2);
+                1500 + adjustFee;
+            return ((rawCost + 800) / 1000).toFixed(2);  // 结果+800元/吨
         }
 
         // 黄铜棒材报价（元/吨->除1000转元/kg）
@@ -222,8 +222,8 @@
             const rawCost = basePrices.copper * 0.57 / 0.98 +
                 basePrices.zinc * 0.4 / 0.95 +
                 leadRatio * basePrices.lead +
-                800 + adjustFee;  // +800加工费
-            return (rawCost / 1000).toFixed(2);
+                adjustFee;
+            return ((rawCost + 800) / 1000).toFixed(2);  // 结果+800元/吨
         }
 
         // 规格调整（基于供应商规则）
