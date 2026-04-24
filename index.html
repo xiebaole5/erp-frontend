@@ -213,16 +213,17 @@
         function calcCopperAlloy(copperRatio, zincRatio, adjustFee) {
             const rawCost = basePrices.copper * copperRatio / 0.98 +
                 basePrices.zinc * zincRatio / 0.95 +
-                1800 + adjustFee;
+                2000 + adjustFee;
             return (rawCost / 1000).toFixed(2);
         }
 
         // 黄铜棒材报价（元/吨->除1000转元/kg）
-        function calcBrass(leadRatio, adjustFee) {
-            const rawCost = basePrices.copper * 0.57 / 0.98 +
-                basePrices.zinc * 0.38 / 0.95 +
-                leadRatio * basePrices.lead +
-                1800 + adjustFee;
+        function calcBrass(copperContent, zincContent, leadRatio, adjustFee) {
+            const leadPrice = 21000; // 铅价固定21000元/吨
+            const rawCost = basePrices.copper * copperContent / 0.98 +
+                basePrices.zinc * zincContent / 0.95 +
+                leadPrice * leadRatio +
+                2000 + adjustFee;
             return (rawCost / 1000).toFixed(2);
         }
 
@@ -302,15 +303,15 @@
         function renderBrass() {
             const tbody = document.getElementById('brassTable');
             const items = [
-                { mat: 'H59-1', shape: '圆棒', fee: 0, wire: 8 },
-                { mat: 'H59-1', shape: '六角/花棒', fee: 500, wire: 8 },
-                { mat: '3604', shape: '圆棒', fee: 0, wire: 8 },
-                { mat: '3604', shape: '六角/花棒', fee: 500, wire: 8 }
+                { mat: 'H59-1', shape: '圆棒', copper: 0.58, zinc: 0.41, lead: 0.01, fee: 0, wire: 8 },
+                { mat: 'H59-1', shape: '六角/花棒', copper: 0.58, zinc: 0.41, lead: 0.01, fee: 500, wire: 8 },
+                { mat: '3604', shape: '圆棒', copper: 0.58, zinc: 0.41, lead: 0, fee: 0, wire: 8 },
+                { mat: '3604', shape: '六角/花棒', copper: 0.58, zinc: 0.41, lead: 0, fee: 500, wire: 8 }
             ];
             
             let html = '';
             items.forEach(item => {
-                const price = parseFloat(calcBrass(item.mat === 'H59-1' ? 0.01 : 0, item.fee)) + getWireAdjust(item.wire);
+                const price = parseFloat(calcBrass(item.copper, item.zinc, item.lead, item.fee)) + getWireAdjust(item.wire);
                 html += `
                     <tr>
                         <td><span class="badge badge-h59">${item.mat}</span></td>
