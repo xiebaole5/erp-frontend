@@ -1,0 +1,479 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>天虹紧固件 - 原材料报价</title>
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif; background: #f5f7fa; min-height: 100vh; padding: 20px; }
+        .container { max-width: 1000px; margin: 0 auto; }
+        header { text-align: center; margin-bottom: 30px; }
+        header h1 { color: #1a5f7a; font-size: 28px; margin-bottom: 8px; }
+        header p { color: #666; font-size: 14px; }
+        .update-time { color: #999; font-size: 12px; margin-top: 5px; }
+        .status { display: inline-block; padding: 2px 8px; border-radius: 4px; font-size: 11px; margin-left: 8px; }
+        .status-ok { background: #e8f5e9; color: #2e7d32; }
+        .status-fail { background: #ffebee; color: #c62828; }
+        
+        .price-board { background: linear-gradient(135deg, #1a5f7a 0%, #2d8fbb 100%); color: white; border-radius: 16px; padding: 24px; margin-bottom: 24px; box-shadow: 0 4px 20px rgba(26,95,122,0.3); }
+        .price-board h2 { font-size: 16px; opacity: 0.9; margin-bottom: 16px; }
+        .price-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(120px, 1fr)); gap: 12px; }
+        .price-item { background: rgba(255,255,255,0.15); border-radius: 12px; padding: 16px; text-align: center; }
+        .price-item .label { font-size: 12px; opacity: 0.8; margin-bottom: 4px; }
+        .price-item .value { font-size: 22px; font-weight: bold; }
+        .price-item .unit { font-size: 11px; opacity: 0.7; }
+
+        .core-section { background: linear-gradient(135deg, #ff6b6b 0%, #ee5a5a 100%); color: white; border-radius: 16px; padding: 20px; margin-bottom: 24px; box-shadow: 0 4px 20px rgba(255,107,107,0.3); }
+        .core-section h2 { font-size: 16px; margin-bottom: 16px; opacity: 0.9; }
+        .core-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 12px; }
+        .core-item { background: rgba(255,255,255,0.15); border-radius: 12px; padding: 16px; }
+        .core-item .name { font-size: 13px; opacity: 0.85; margin-bottom: 4px; }
+        .core-item .price { font-size: 26px; font-weight: bold; }
+        .core-item .unit { font-size: 12px; opacity: 0.7; }
+
+        .section { background: white; border-radius: 12px; padding: 20px; margin-bottom: 16px; box-shadow: 0 2px 8px rgba(0,0,0,0.06); }
+        .section h3 { color: #1a5f7a; font-size: 16px; margin-bottom: 16px; padding-bottom: 10px; border-bottom: 2px solid #e8f4f8; }
+        .quote-table { width: 100%; border-collapse: collapse; }
+        .quote-table th { background: #f8fafb; padding: 10px 8px; text-align: left; font-size: 12px; color: #666; font-weight: 500; border-bottom: 1px solid #eee; }
+        .quote-table td { padding: 10px 8px; font-size: 13px; color: #333; border-bottom: 1px solid #f0f0f0; }
+        .quote-table tr:last-child td { border-bottom: none; }
+        .quote-table .num { text-align: right; font-variant-numeric: tabular-nums; }
+        .badge { display: inline-block; padding: 2px 8px; border-radius: 4px; font-size: 11px; }
+        .badge-h62 { background: #e3f2fd; color: #1565c0; }
+        .badge-h65 { background: #e8f5e9; color: #2e7d32; }
+        .badge-h59 { background: #fff3e0; color: #ef6c00; }
+        .badge-304 { background: #fce4ec; color: #c2185b; }
+        .badge-hc1 { background: #f3e5f5; color: #7b1fa2; }
+        .badge-hc2 { background: #e1f5fe; color: #0277bd; }
+        .badge-hc3 { background: #fff8e1; color: #f57f17; }
+        .badge-hc { background: #e0f7fa; color: #00838f; }
+
+        .loading { text-align: center; padding: 40px; color: #999; }
+        .refresh-btn { display: block; margin: 20px auto; padding: 10px 24px; background: #1a5f7a; color: white; border: none; border-radius: 8px; cursor: pointer; font-size: 14px; }
+        .refresh-btn:hover { background: #2d8fbb; }
+        .refresh-btn:disabled { background: #ccc; cursor: not-allowed; }
+
+        .note { background: #fff3cd; border: 1px solid #ffc107; border-radius: 8px; padding: 12px; margin-top: 16px; font-size: 12px; color: #856404; }
+        .note strong { color: #721c24; }
+
+        @media (max-width: 600px) {
+            .price-grid, .core-grid { grid-template-columns: repeat(2, 1fr); }
+            .quote-table { font-size: 12px; }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <header>
+            <h1>浙江天虹紧固件</h1>
+            <p>原材料参考报价系统 <span class="status status-fail" id="statusBadge">数据加载中</span></p>
+            <p class="update-time" id="updateTime"></p>
+            <p style="margin-top: 12px;">
+                <a href="gasket.html" style="background: #667eea; color: white; padding: 8px 16px; border-radius: 8px; text-decoration: none; font-size: 14px;">📊 垫片价格查询</a>
+            </p>
+        </header>
+
+        <div class="price-board">
+            <h2>长江有色金属现货价（元/吨）</h2>
+            <div class="price-grid" id="priceGrid">
+                <div class="loading">正在加载价格数据...</div>
+            </div>
+        </div>
+
+        <div class="core-section">
+            <h2>核心规格报价（元/kg）</h2>
+            <div class="core-grid" id="coreGrid">
+                <div class="core-item">
+                    <div class="name">H62铜线 5.28mm</div>
+                    <div class="price" id="core1">--</div>
+                    <div class="unit">元/kg</div>
+                </div>
+                <div class="core-item">
+                    <div class="name">304HC2白线 3.43mm</div>
+                    <div class="price" id="core2">--</div>
+                    <div class="unit">元/kg</div>
+                </div>
+                <div class="core-item">
+                    <div class="name">304HC2草酸线 5.25mm</div>
+                    <div class="price" id="core3">--</div>
+                    <div class="unit">元/kg</div>
+                </div>
+            </div>
+        </div>
+
+        <button class="refresh-btn" id="refreshBtn" onclick="loadPrices()" style="display:none;">刷新价格</button>
+
+        <div class="section">
+            <h3>铜合金线材报价（元/kg）</h3>
+            <table class="quote-table">
+                <thead>
+                    <tr>
+                        <th>规格</th>
+                        <th>材质</th>
+                        <th class="num">参考价</th>
+                    </tr>
+                </thead>
+                <tbody id="copperTable"></tbody>
+            </table>
+        </div>
+
+        <div class="section">
+            <h3>黄铜棒材报价（元/kg）</h3>
+            <table class="quote-table">
+                <thead>
+                    <tr>
+                        <th>材质</th>
+                        <th>形状</th>
+                        <th class="num">参考价</th>
+                    </tr>
+                </thead>
+                <tbody id="brassTable"></tbody>
+            </table>
+        </div>
+
+        <div class="section">
+            <h3>不锈钢线材报价 - 白线（元/kg）</h3>
+            <table class="quote-table">
+                <thead>
+                    <tr>
+                        <th>材质</th>
+                        <th>线径</th>
+                        <th class="num">白线</th>
+                    </tr>
+                </thead>
+                <tbody id="steelWhiteTable"></tbody>
+            </table>
+        </div>
+
+        <div class="section">
+            <h3>不锈钢线材报价 - 草酸线（元/kg）</h3>
+            <table class="quote-table">
+                <thead>
+                    <tr>
+                        <th>材质</th>
+                        <th>线径</th>
+                        <th class="num">草酸线</th>
+                    </tr>
+                </thead>
+                <tbody id="steelAcidTable"></tbody>
+            </table>
+        </div>
+
+
+    </div>
+
+    <script>
+        // 基础价格（长江有色现货价，单位：元/吨）
+        let basePrices = {
+            copper: 94850,      // 电解铜 2026-05-15 长江现货
+            zinc: 24650,        // 1#锌 2026-05-15 长江现货
+            lead: 16750,        // 沪铅
+            nickel: 144350,     // 1#镍 2026-05-15 长江现货
+        };
+
+        // 不锈钢铜配比
+        const steelCopperRatio = {
+            '304L': 0,
+            '304B': 0.005,
+            '304HC1': 0.01,
+            '304HC2': 0.02,
+            '304HC3': 0.03
+        };
+
+        // 不锈钢公式报价（元/吨->除1000转元/kg）
+        // 白线 = 沪铜×铜配比 + 沪镍×0.1 + 铁矿石×0.1 + 1200 + 线径调整费
+        // 草酸线 = 白线 + 500 + 线径调整费
+        // HC3额外+1500（供应商报价有问题）
+        function calcStainless(copperRatio, steelType, wireSize, isAcid) {
+            const IRON_ORE = 1000;  // 铁矿石固定值
+            
+            // 线径调整费
+            let wireAdjust = 0;
+            if (wireSize >= 4.0) wireAdjust = 0;
+            else if (wireSize >= 3.0) wireAdjust = 200;
+            else if (wireSize >= 2.0) wireAdjust = 500;
+            else wireAdjust = 900;
+
+            // 白线基准价
+            let whitePrice = basePrices.copper * copperRatio +
+                basePrices.nickel * 0.1 +
+                IRON_ORE * 0.1 +
+                1200 + 2000 + wireAdjust;
+
+            // HC3额外加1500
+            if (steelType === '304HC3') {
+                whitePrice += 1500;
+            }
+
+            // 草酸线加500
+            const acidAdjust = isAcid ? 500 : 0;
+
+            return ((whitePrice + acidAdjust) / 1000).toFixed(2);
+        }
+
+        // 铜合金线材报价（元/吨->除1000转元/kg）
+        function calcCopperAlloy(copperRatio, zincRatio, adjustFee) {
+            const rawCost = basePrices.copper * copperRatio / 0.98 +
+                basePrices.zinc * zincRatio / 0.95 +
+                2000 + adjustFee;
+            return (rawCost / 1000).toFixed(2);
+        }
+
+        // 黄铜棒材报价（元/吨->除1000转元/kg）
+        // H59-1: 不加2000，最终+1元/kg
+        // 3604: 不加2000，不加额外费用
+        function calcBrass(copperContent, zincContent, hasLead, isHex) {
+            const copperLoss = 0.98;
+            const zincLoss = 0.95;
+            const leadRatio = 0.01;
+            const leadPrice = basePrices.lead || 21000;
+            const hexFee = isHex ? 500 : 0;
+            
+            let rawCost = basePrices.copper * copperContent / copperLoss +
+                basePrices.zinc * zincContent / zincLoss;
+            
+            if (hasLead) {
+                rawCost += leadPrice * leadRatio;
+            }
+            
+            // H59-1/3604 不加2000加工费
+            rawCost += hexFee;
+            
+            let price = rawCost / 1000;
+            
+            // H59-1含铅，最终每公斤+1元
+            if (hasLead) {
+                price += 1.00;
+            }
+            
+            return price.toFixed(2);
+        }
+
+        // 规格调整（基于供应商规则）
+        function getWireAdjust(wireSize) {
+            if (wireSize >= 11.5) return 0.5;
+            if (wireSize >= 2.0 && wireSize < 2.5) return 0.5;
+            if (wireSize < 2.0) return 1.5;
+            return 0;
+        }
+        function renderPriceBoard() {
+            const grid = document.getElementById('priceGrid');
+            grid.innerHTML = `
+                <div class="price-item">
+                    <div class="label">沪铜主力</div>
+                    <div class="value">${(basePrices.copper/1000).toFixed(0)}</div>
+                    <div class="unit">千/吨</div>
+                </div>
+                <div class="price-item">
+                    <div class="label">1#锌</div>
+                    <div class="value">${(basePrices.zinc/1000).toFixed(0)}</div>
+                    <div class="unit">千/吨</div>
+                </div>
+                <div class="price-item">
+                    <div class="label">沪镍</div>
+                    <div class="value">${(basePrices.nickel/1000).toFixed(0)}</div>
+                    <div class="unit">千/吨</div>
+                </div>
+                <div class="price-item">
+                    <div class="label">沪铅</div>
+                    <div class="value">${(basePrices.lead/1000).toFixed(0)}</div>
+                    <div class="unit">千/吨</div>
+                </div>
+            `;
+        }
+
+        // 渲染核心规格
+        function renderCoreSpecs() {
+            // H62铜线5.28mm - 用铜合金公式
+            const h62_528 = calcCopperAlloy(0.62, 0.38, 0);
+            // 304HC2白线3.43mm - 用不锈钢公式
+            const hc2_white = calcStainless(0.02, '304HC2', 3.43, false);
+            // 304HC2草酸线5.25mm
+            const hc2_acid = calcStainless(0.02, '304HC2', 5.25, true);
+            
+            document.getElementById('core1').textContent = h62_528;
+            document.getElementById('core2').textContent = hc2_white;
+            document.getElementById('core3').textContent = hc2_acid;
+        }
+
+        // 渲染铜合金线材
+        function renderCopperAlloy() {
+            const tbody = document.getElementById('copperTable');
+            const specs = [
+                { size: '≥4.0mm', adjust: 0, wire: 4.5 },
+                { size: '3.0-4.0mm', adjust: 500, wire: 3.5 },
+                { size: '2.0-3.0mm', adjust: 1000, wire: 2.5 },
+                { size: '1.0-2.0mm', adjust: 1500, wire: 1.5 }
+            ];
+            
+            let html = '';
+            specs.forEach(spec => {
+                const h62 = parseFloat(calcCopperAlloy(0.62, 0.38, spec.adjust)) + getWireAdjust(spec.wire);
+                const h65 = parseFloat(calcCopperAlloy(0.65, 0.36, spec.adjust)) + getWireAdjust(spec.wire);
+                html += `
+                    <tr>
+                        <td>${spec.size}</td>
+                        <td><span class="badge badge-h62">H62</span> <span class="badge badge-h65">H65</span></td>
+                        <td class="num">${h62.toFixed(2)} / ${h65.toFixed(2)}</td>
+                    </tr>
+                `;
+            });
+            tbody.innerHTML = html;
+        }
+
+        // 渲染黄铜棒材
+        function renderBrass() {
+            const tbody = document.getElementById('brassTable');
+            const items = [
+                { mat: 'H59-1', shape: '圆棒', copper: 0.58, zinc: 0.41, hasLead: true, isHex: false },
+                { mat: 'H59-1', shape: '六角/花棒', copper: 0.58, zinc: 0.41, hasLead: true, isHex: true },
+                { mat: '3604', shape: '圆棒', copper: 0.58, zinc: 0.42, hasLead: false, isHex: false },
+                { mat: '3604', shape: '六角/花棒', copper: 0.58, zinc: 0.42, hasLead: false, isHex: true }
+            ];
+            
+            let html = '';
+            items.forEach(item => {
+                const price = parseFloat(calcBrass(item.copper, item.zinc, item.hasLead, item.isHex));
+                html += `
+                    <tr>
+                        <td><span class="badge badge-h59">${item.mat}</span></td>
+                        <td>${item.shape}</td>
+                        <td class="num">${price.toFixed(2)}</td>
+                    </tr>
+                `;
+            });
+            tbody.innerHTML = html;
+        }
+
+        // 渲染不锈钢白线
+        function renderSteelWhite() {
+            const tbody = document.getElementById('steelWhiteTable');
+            const specs = ['304L', '304B', '304HC1', '304HC2', '304HC3'];
+            const sizes = [
+                { size: '≥4.0mm', val: 4.5 },
+                { size: '3.0-4.0mm', val: 3.5 },
+                { size: '2.0-3.0mm', val: 2.5 },
+                { size: '1.0-2.0mm', val: 1.5 }
+            ];
+            
+            let html = '';
+            sizes.forEach(s => {
+                const prices = specs.map((spec, i) => calcStainless(steelCopperRatio[spec], spec, s.val, false));
+                const badges = specs.map((sp, i) => {
+                    if (sp === '304L' || sp === '304B') return `<span class="badge badge-304">${sp}</span>`;
+                    return `<span class="badge badge-hc${i}">${sp}</span>`;
+                });
+                html += `
+                    <tr>
+                        <td>${badges.join(' ')}</td>
+                        <td>${s.size}</td>
+                        <td class="num">${prices.join(' / ')}</td>
+                    </tr>
+                `;
+            });
+            tbody.innerHTML = html;
+        }
+
+        // 渲染不锈钢草酸线
+        function renderSteelAcid() {
+            const tbody = document.getElementById('steelAcidTable');
+            const specs = ['304L', '304B', '304HC1', '304HC2', '304HC3'];
+            const sizes = [
+                { size: '≥4.0mm', val: 4.5 },
+                { size: '3.0-4.0mm', val: 3.5 },
+                { size: '2.0-3.0mm', val: 2.5 },
+                { size: '1.0-2.0mm', val: 1.5 }
+            ];
+            
+            let html = '';
+            sizes.forEach(s => {
+                const prices = specs.map((spec, i) => calcStainless(steelCopperRatio[spec], spec, s.val, true));
+                const badges = specs.map((sp, i) => {
+                    if (sp === '304L' || sp === '304B') return `<span class="badge badge-304">${sp}</span>`;
+                    return `<span class="badge badge-hc${i}">${sp}</span>`;
+                });
+                html += `
+                    <tr>
+                        <td>${badges.join(' ')}</td>
+                        <td>${s.size}</td>
+                        <td class="num">${prices.join(' / ')}</td>
+                    </tr>
+                `;
+            });
+            tbody.innerHTML = html;
+        }
+
+        // 从长江有色网抓取现货价格（铜、锌、镍）
+        // 从上海有色网抓取铅价
+        async function fetchPrices() {
+            try {
+                // 1. 长江有色网 - 铜、锌、镍
+                const ccmnResp = await fetch('https://m.ccmn.cn/');
+                const ccmnHtml = await ccmnResp.text();
+                
+                const copperMatch = ccmnHtml.match(/铜[\s\S]{0,30}?(\d{5,6})[\s\S]{0,30}?(\d{5,6})/);
+                const zincMatch = ccmnHtml.match(/锌[\s\S]{0,30}?(\d{5,6})[\s\S]{0,30}?(\d{5,6})/);
+                const nickelMatch = ccmnHtml.match(/镍[\s\S]{0,30}?(\d{5,6})[\s\S]{0,30}?(\d{5,6})/);
+                
+                if (copperMatch) {
+                    basePrices.copper = (parseInt(copperMatch[1]) + parseInt(copperMatch[2])) / 2;
+                }
+                if (zincMatch) {
+                    basePrices.zinc = (parseInt(zincMatch[1]) + parseInt(zincMatch[2])) / 2;
+                }
+                if (nickelMatch) {
+                    basePrices.nickel = (parseInt(nickelMatch[1]) + parseInt(nickelMatch[2])) / 2;
+                }
+                
+                // 2. 上海有色网 SMM - 铅价
+                try {
+                    const smmResp = await fetch('https://hq.smm.cn/h5/pb-price');
+                    const smmHtml = await smmResp.text();
+                    
+                    // 解析上海铅价 16400-16500 均价16450
+                    const shMatch = smmHtml.match(/上海[\s\S]{0,30}?(\d{5})[\s\S]{0,30}?(\d{5})[\s\S]{0,30}?(\d{5})/);
+                    if (shMatch) {
+                        basePrices.lead = (parseInt(shMatch[1]) + parseInt(shMatch[2])) / 2;
+                    }
+                } catch (e) {
+                    console.log('上海有色铅价抓取失败');
+                }
+                
+                return true;
+            } catch (e) {
+                console.log('数据抓取失败，使用默认价格', e);
+                basePrices.lead = 16450; // 默认SMM铅价
+                return false;
+            }
+        }
+
+        // 主加载函数
+        async function loadPrices() {
+            const btn = document.getElementById('refreshBtn');
+            btn.disabled = true;
+            btn.textContent = '加载中...';
+            
+            const success = await fetchPrices();
+            
+            document.getElementById('statusBadge').className = success ? 'status status-ok' : 'status status-fail';
+            document.getElementById('statusBadge').textContent = success ? '实时数据' : '默认数据';
+            document.getElementById('updateTime').textContent = 
+                `最后更新：${new Date().toLocaleString('zh-CN')}`;
+            
+            renderPriceBoard();
+            renderCoreSpecs();
+            renderCopperAlloy();
+            renderBrass();
+            renderSteelWhite();
+            renderSteelAcid();
+            
+            btn.disabled = false;
+            btn.textContent = '刷新价格';
+        }
+
+        // 页面加载
+        loadPrices();
+    </script>
+</body>
+</html>
