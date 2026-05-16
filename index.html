@@ -168,7 +168,7 @@
         let basePrices = {
             copper: 94850,      // 电解铜 2026-05-15 长江现货
             zinc: 24650,        // 1#锌 2026-05-15 长江现货
-            lead: 16750,        // 沪铅
+            lead: 21306,        // 沪铅
             nickel: 144350,     // 1#镍 2026-05-15 长江现货
         };
 
@@ -326,10 +326,10 @@
         function renderBrass() {
             const tbody = document.getElementById('brassTable');
             const items = [
-                { mat: 'H59-1', shape: '圆棒', copper: 0.58, zinc: 0.41, hasLead: true, isHex: false },
-                { mat: 'H59-1', shape: '六角/花棒', copper: 0.58, zinc: 0.41, hasLead: true, isHex: true },
-                { mat: '3604', shape: '圆棒', copper: 0.58, zinc: 0.42, hasLead: false, isHex: false },
-                { mat: '3604', shape: '六角/花棒', copper: 0.58, zinc: 0.42, hasLead: false, isHex: true }
+                { mat: 'H59-1', shape: '圆棒', copper: 94850.58, zinc: 24650.41, hasLead: true, isHex: false },
+                { mat: 'H59-1', shape: '六角/花棒', copper: 94850.58, zinc: 24650.41, hasLead: true, isHex: true },
+                { mat: '3604', shape: '圆棒', copper: 94850.58, zinc: 24650.42, hasLead: false, isHex: false },
+                { mat: '3604', shape: '六角/花棒', copper: 94850.58, zinc: 24650.42, hasLead: false, isHex: true }
             ];
             
             let html = '';
