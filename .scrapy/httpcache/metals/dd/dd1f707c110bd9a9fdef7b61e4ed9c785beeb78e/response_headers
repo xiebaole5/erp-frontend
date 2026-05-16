@@ -1,0 +1,16 @@
+Server: openresty
+Date: Sat, 16 May 2026 04:08:48 GMT
+Content-Type: text/html; charset=utf-8
+Last-Modified: Fri, 15 May 2026 08:52:20 GMT
+Vary: Accept-Encoding
+Vary: Origin
+Etag: W/"6a06dec4-18892"
+Strict-Transport-Security: max-age=31536000; includeSubDomains
+X-Frame-Options: SAMEORIGIN
+X-Content-Type-Options: nosniff
+X-Xss-Protection: 1; mode=block
+Access-Control-Allow-Credentials: true
+Access-Control-Allow-Methods: GET, POST, OPTIONS, PUT, DELETE
+Access-Control-Allow-Headers: DNT,X-Mx-ReqToken,Keep-Alive,User-Agent,X-Requested-With,If-Modified-Since,Cache-Control,Content-Type,X-Custom-Header,Access-Control-Expose-Headers,Token,Authorization,Range,time,sign
+Access-Control-Expose-Headers: Content-Length,Content-Range
+Content-Encoding: gzip
